@@ -1,10 +1,9 @@
 {
   "name": "express-mesto",
   "version": "1.0.0",
-  "description": "## Директории",
+  "description": "Бэкенд проекта Место.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "start": "node app.js",
     "dev": "nodemon app.js"
@@ -13,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/anastasia-lamakina/express-mesto.git"
   },
-  "author": "",
+  "author": "Анастасия Ламакина",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/anastasia-lamakina/express-mesto/issues"
