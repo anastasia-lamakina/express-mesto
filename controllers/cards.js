@@ -1,4 +1,6 @@
 /* eslint-disable implicit-arrow-linebreak */
+const NotFoundError = require('../errors/notFoundError');
+const UnauthorizedAccessError = require('../errors/unauthorizedAcessError');
 const Card = require('../models/card');
 
 const createCard = (req, res) => {
@@ -25,29 +27,31 @@ const getCards = (req, res) => {
     );
 };
 
-const deleteCardById = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+const deleteCardById = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (card) {
-        res.send(card);
+        if (card.owner.toString() === req.user._id) {
+          Card.findByIdAndDelete(req.params.cardId).then((deletedCard) => {
+            res.send(deletedCard);
+          });
+        } else {
+          throw new UnauthorizedAccessError('Необходима авторизация');
+        }
       } else {
-        const error = new Error('Карточка с указанным id не найдена.');
-        error.name = 'CardNotFoundError';
-        throw error;
+        throw new NotFoundError('Карточка с указанным id не найдена.');
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Передан некорректный id.' });
-      } else if (err.name === 'CardNotFoundError') {
-        res.status(404).send({ message: err.message });
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка.' });
+        next(err);
       }
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -57,9 +61,7 @@ const likeCard = (req, res) => {
       if (card) {
         res.send(card);
       } else {
-        const error = new Error('Карточка с указанным id не найдена.');
-        error.name = 'CardNotFoundError';
-        throw error;
+        throw new NotFoundError('Карточка с указанным id не найдена.');
       }
     })
     .catch((err) => {
@@ -69,15 +71,13 @@ const likeCard = (req, res) => {
         });
       } else if (err.name === 'CastError') {
         res.status(400).send({ message: 'Передан некорректный id.' });
-      } else if (err.name === 'CardNotFoundError') {
-        res.status(404).send({ message: err.message });
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка.' });
+        next(err);
       }
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -87,9 +87,7 @@ const dislikeCard = (req, res) => {
       if (card) {
         res.send(card);
       } else {
-        const error = new Error('Карточка с указанным id не найдена.');
-        error.name = 'CardNotFoundError';
-        throw error;
+        throw new NotFoundError('Карточка с указанным id не найдена.');
       }
     })
     .catch((err) => {
@@ -99,10 +97,8 @@ const dislikeCard = (req, res) => {
         });
       } else if (err.name === 'CastError') {
         res.status(400).send({ message: 'Передан некорректный id.' });
-      } else if (err.name === 'CardNotFoundError') {
-        res.status(404).send({ message: err.message });
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка.' });
+        next(err);
       }
     });
 };
