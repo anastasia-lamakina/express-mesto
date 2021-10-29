@@ -7,6 +7,7 @@ const {
   updateUserAvatar,
   getLoggedUser,
 } = require('../controllers/users');
+const validateURL = require('../utils/validateURL');
 
 const router = express.Router();
 
@@ -14,7 +15,15 @@ router.get('/', getUsers);
 
 router.get('/me', getLoggedUser);
 
-router.get('/:userId', getUserById);
+router.get(
+  '/:userId',
+  celebrate({
+    params: {
+      userId: Joi.string().length(24).hex(),
+    },
+  }),
+  getUserById,
+);
 
 router.patch(
   '/me',
@@ -31,7 +40,7 @@ router.patch(
   '/me/avatar',
   celebrate({
     body: Joi.object().keys({
-      avatar: Joi.string().required(),
+      avatar: Joi.string().custom(validateURL),
     }),
   }),
   updateUserAvatar,

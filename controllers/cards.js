@@ -1,30 +1,30 @@
-/* eslint-disable implicit-arrow-linebreak */
 const NotFoundError = require('../errors/notFoundError');
-const UnauthorizedAccessError = require('../errors/unauthorizedAcessError');
+const ForbiddenError = require('../errors/forbiddenError');
+const BadRequestError = require('../errors/badRequestError');
 const Card = require('../models/card');
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Переданы некорректные данные при создании карточки.',
-        });
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при создании карточки.',
+          ),
+        );
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка.' });
+        next(err);
       }
     });
 };
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() =>
-      res.status(500).send({ message: 'На сервере произошла ошибка.' }),
-    );
+    .catch((err) => next(err));
 };
 
 const deleteCardById = (req, res, next) => {
@@ -36,7 +36,7 @@ const deleteCardById = (req, res, next) => {
             res.send(deletedCard);
           });
         } else {
-          throw new UnauthorizedAccessError('Необходима авторизация');
+          throw new ForbiddenError('Необходима авторизация');
         }
       } else {
         throw new NotFoundError('Карточка с указанным id не найдена.');
@@ -44,7 +44,7 @@ const deleteCardById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Передан некорректный id.' });
+        next(new BadRequestError('Передан некорректный id.'));
       } else {
         next(err);
       }
@@ -66,11 +66,13 @@ const likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Переданы некорректные данные для постановки лайка.',
-        });
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные для постановки лайка.',
+          ),
+        );
       } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Передан некорректный id.' });
+        next(new BadRequestError('Передан некорректный id.'));
       } else {
         next(err);
       }
@@ -92,11 +94,13 @@ const dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Переданы некорректные данные для снятии лайка.',
-        });
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные для постановки лайка.',
+          ),
+        );
       } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Передан некорректный id.' });
+        next(new BadRequestError('Передан некорректный id.'));
       } else {
         next(err);
       }

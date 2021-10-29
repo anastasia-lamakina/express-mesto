@@ -12,11 +12,10 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (url) =>
-        isURL(url, {
-          require_protocol: true,
-          protocols: ['http', 'https'],
-        }),
+      validator: (url) => isURL(url, {
+        require_protocol: true,
+        protocols: ['http', 'https'],
+      }),
     },
   },
   owner: {
