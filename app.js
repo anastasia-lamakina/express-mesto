@@ -54,11 +54,9 @@ app.use((req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   if (err.status) {
     res.status(err.status).send({ message: err.message });
-  } else if (err.message === 'Validation failed') {
-    res.status(400).send({ message: 'Переданы неверные данные.' });
   } else {
     res.status(500).send({ message: 'На сервере произошла ошибка.' });
   }
