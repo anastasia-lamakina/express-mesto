@@ -18,7 +18,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(cookieParser());
-app.use(errors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -54,7 +53,10 @@ app.use((req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
-app.use((err, req, res) => {
+app.use(errors());
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
   if (err.status) {
     res.status(err.status).send({ message: err.message });
   } else {

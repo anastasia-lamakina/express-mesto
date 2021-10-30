@@ -36,7 +36,9 @@ const deleteCardById = (req, res, next) => {
             res.send(deletedCard);
           });
         } else {
-          throw new ForbiddenError('Необходима авторизация');
+          throw new ForbiddenError(
+            'Невозможно удалить карточку созданную другим пользователем.',
+          );
         }
       } else {
         throw new NotFoundError('Карточка с указанным id не найдена.');

@@ -40,7 +40,7 @@ router.patch(
   '/me/avatar',
   celebrate({
     body: Joi.object().keys({
-      avatar: Joi.string().custom(validateURL),
+      avatar: Joi.string().required().custom(validateURL),
     }),
   }),
   updateUserAvatar,
